@@ -1,2 +1,2 @@
 # VSTExprPhylo
-Scripts and analyses in Visium Spatial Transcriptomics phylogenetic analyses paper
+Scripts and analyses for Visium Spatial Transcriptomics phylogenetics paper
