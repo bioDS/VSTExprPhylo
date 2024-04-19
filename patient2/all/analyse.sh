@@ -10,7 +10,7 @@
 #insert path to the folder with .h5 files:
 path_to_h5s=""
 
-Rscript make_fasta.R  $path_to_h5s"tumour1.h5" $path_to_h5s"tumour2.h5" $path_to_h5s"normal1.h5" $path_to_h5s"normal2.h5"
+Rscript make_fasta.R  $path_to_h5s"tumour1.h5" $path_to_h5s"tumour2.h5" $path_to_h5s"normal.h5" $path_to_h5s"ovary.h5"
 
 mkdir IQ-TREE
 mkdir IQ-TREE/filtered05
