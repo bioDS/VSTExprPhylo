@@ -1,6 +1,6 @@
-#P1 50% density analysis
+#P2 50% density analysis
 # This script requiers
-# 1. files tumour1.h5, tumour2.h5, normal1.h5, normal2.h5 to be in path_to_h5s folder
+# 1. files tumour1.h5, tumour2.h5, normal.h5, ovary.h5 to be in path_to_h5s folder
 # 2. R
 # 3. PhyloRNA package to be installed for R
 # 4. PhyloRNAanalysis repo https://github.com/bioDS/phyloRNAanalysis + adjust paths to expr.r, utils.r and filter.r in make_fasta.R script
