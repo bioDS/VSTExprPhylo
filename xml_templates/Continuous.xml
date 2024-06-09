@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.branchratemodel:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
+
+<map name="Uniform" >beast.math.distributions.Uniform</map>
+<map name="Exponential" >beast.math.distributions.Exponential</map>
+<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+<map name="Normal" >beast.math.distributions.Normal</map>
+<map name="Beta" >beast.math.distributions.Beta</map>
+<map name="Gamma" >beast.math.distributions.Gamma</map>
+<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+<map name="prior" >beast.math.distributions.Prior</map>
+<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+<map name="Dirichlet" >beast.math.distributions.Dirichlet</map>
+
+<run id="mcmc" spec="MCMC" chainLength="10000000">
+	<state id="state" storeEvery="5000">
+        <tree id="TheTree" spec="beast.evolution.tree.Tree" name="stateNode">
+            <taxonset id="TaxonSet" spec="TaxonSet">
+                insert_taxonset
+            </taxonset>
+        </tree>
+        <stateNode idref="varValues"/>
+        <stateNode idref="rootValues"/>
+        <parameter id="birthRate" name="stateNode">1.250255</parameter>
+        <parameter id="deathRate" name="stateNode">0.7498399</parameter>
+	</state>
+    
+    <init id="RandomTree.t" spec="beast.evolution.tree.RandomTree" estimate="false" initial="@TheTree" taxonset="@TaxonSet">
+
+        <populationModel id="ConstantPopulation0.t" spec="ConstantPopulation">
+
+            <parameter id="randomPopSize.t" spec="parameter.RealParameter" name="popSize">1.0</parameter>
+
+        </populationModel>
+
+    </init>
+
+	<distribution id="posterior" spec="util.CompoundDistribution">
+    <!-- START prior -->
+    <distribution id="prior" spec="util.CompoundDistribution">
+        <distribution id="BirthDeathPrior" spec="beast.evolution.speciation.BirthDeathGernhard08Model" birthDiffRate="@birthRate" relativeDeathRate="@deathRate" tree="@TheTree"/>
+        <distribution id="FBDbirthRatePrior" spec="beast.math.distributions.Prior" x="@birthRate">
+            <Uniform id="Uniform.0" name="distr" lower="0.0" upper="100.0"/>
+        </distribution>
+        <distribution id="FBDdeathRatePrior" spec="beast.math.distributions.Prior" x="@deathRate">
+            <Uniform id="Uniform.1" name="distr" lower="0.0" upper="1.0"/>
+        </distribution>
+
+        <distribution id="varValuesPrior" spec="beast.math.distributions.Prior" x="@varValues">
+            <distr id="LogNormal.varValues" spec="beast.math.distributions.LogNormalDistributionModel" S="0.3" M="1.0"/>
+        </distribution>
+
+        <distribution id="rootValuesPrior" spec="beast.math.distributions.Prior" x="@rootValues">
+            <distr id="Normal.rootValues" spec="beast.math.distributions.Normal" mean="0.0" sigma="2.0"/>
+        </distribution>
+
+    </distribution>
+    <!-- END prior -->
+
+    <!-- START likelihood -->
+    <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+     <!-- START Morphological likleihood-->
+        <distribution id="PCMLikelihood" spec="contraband.prunelikelihood.BMPruneLikelihood">
+            <tree idref="TheTree"/>
+            <traits id="oneTraitData" spec="parameter.RealParameter" minordimension="insert_minor_dimension" keys="insert_keys">
+                insert_counts
+            </traits>
+
+            <branchRateModel id="rateCatClock" spec="contraband.clock.RateCategoryClockModel" nCat="1">
+                <rates id="rateValues" spec="parameter.RealParameter">1</rates>
+                <rateCatAssign id="rateAssignments" spec="parameter.IntegerParameter" lower="0" upper="1">0</rateCatAssign>
+                <tree idref="TheTree"/>
+            </branchRateModel>
+
+            <nodeMath id="pcmNodeMath" spec="contraband.math.NodeMath" traits="@oneTraitData">
+            	<sigmasq id="varValues" spec="parameter.RealParameter">1.0</sigmasq>
+            	<correlation id="covValues" spec="parameter.RealParameter">0.0</correlation>
+                <rootValues id="rootValues" spec="parameter.RealParameter">0.0</rootValues>
+            </nodeMath>
+        </distribution>
+        <!-- END Morphological likleihood -->
+	</distribution> 
+	<!-- END Likelihood -->
+	</distribution> 
+	<!-- END Posterior -->
+
+
+    <operator id="VarValueScaler" spec="ScaleOperator" parameter="@varValues" scaleFactor="0.75" weight="6.0"/>
+    <operator id="rootValueScaler" spec="RealRandomWalkOperator" parameter="@rootValues" windowSize="0.75" weight="6.0"/>
+
+    <operator id="BirthDeathTreeScaler" spec="ScaleOperator" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
+    <operator id="BirthDeathTreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@TheTree" weight="3.0"/>
+    <operator id="BirthDeathUniformOperator" spec="Uniform" tree="@TheTree" weight="30.0"/>
+    <operator id="BirthDeathSubtreeSlide" spec="SubtreeSlide" tree="@TheTree" weight="15.0"/>
+    <operator id="BirthDeathNarrow" spec="Exchange" tree="@TheTree" weight="15.0"/>
+    <operator id="BirthDeathWide" spec="Exchange" isNarrow="false" tree="@TheTree" weight="3.0"/>
+    <operator id="BirthDeathWilsonBalding" spec="WilsonBalding" tree="@TheTree" weight="3.0"/>
+
+    <operator id="BirthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>
+    <operator id="DeathRateScaler" spec="ScaleOperator" parameter="@deathRate" scaleFactor="0.75" weight="3.0"/>
+
+    <logger id="tracelog" fileName="filename.log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
+      <log idref="posterior"/>
+      <log idref="likelihood"/>
+      <log idref="prior"/>
+      <log id="TreeStats" spec="beast.evolution.tree.TreeStatLogger" tree="@TheTree"/>
+      <log idref="varValues"/>
+      <!-- <log idref="covValues"/> -->
+      <log idref="rootValues"/>
+      <log idref="birthRate"/>
+      <log idref="deathRate"/>
+    </logger>
+
+    <logger id="screenlog" logEvery="100000">
+        <log idref="posterior"/>
+        <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+    </logger>
+
+    <logger id="treelog" fileName="filename.trees" logEvery="10000" mode="tree">
+        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@TheTree"/>
+    </logger>
+  </run>
+</beast>
