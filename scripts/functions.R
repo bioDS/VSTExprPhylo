@@ -15,3 +15,19 @@ rename_categories <- function(data, expected_char_num) {
   
   data
 }
+
+remove_zeroexrp_cells_genes <- function(data, sample) {
+    n_cells <- ncol(data)
+    data <- data[colSums(data)>0]
+    data <- data[rowSums(data)>0,]
+    
+    if (ncol(data) < n_cells) {
+        print(paste("WARNING: Some spots were removed in sample",
+        sample, "with", as.character(ncol(data)), "remaning spots.", sep=" "))
+    }
+    
+    print(paste("The number of genes in sample", sample, "is", as.character(nrow(data)), "after removing zero-expressed genes.", sep = " "))
+    
+    data
+    
+}
