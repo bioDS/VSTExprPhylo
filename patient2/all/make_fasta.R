@@ -1,14 +1,14 @@
 library("phyloRNA")
 
 # enter correct paths to the phyloRNAanalysis scripts
-import::from(".../phyloRNAanalysis/src/expr.r", preprocess_expression)
-import::from(".../phyloRNAanalysis/src/utils.r", read_table, write_table, table2fasta)
-import::from(".../phyloRNAanalysis/src/filter.r", density_filtering)
+import::from("../phyloRNAanalysis/src/expr.r", preprocess_expression)
+import::from("../phyloRNAanalysis/src/utils.r", read_table, write_table, table2fasta)
+import::from("../phyloRNAanalysis/src/filter.r", density_filtering)
 
 import::from("../../scripts/functions.R", rename_categories)
 
 # enter correct path
-setwd(".../VSTExprPhylo/patient1/all")
+setwd("../VSTExprPhylo/patient2/all")
 
 args = commandArgs(trailingOnly=TRUE)
 
